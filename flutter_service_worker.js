@@ -7,7 +7,7 @@ const RESOURCES = {
 "assets/assets/images/me.jpeg": "b8350e6644e35dd0ed34c0736ff168de",
 "assets/assets/resume/Issa%2520Loubani%2520Resume.pdf": "c5cb6ab53a4dfccf842655624f765071",
 "assets/configs/pages.json": "a4b4f59fd142967f50c5051db4602824",
-"assets/configs/profile.json": "5ef2f7ac1258a2ab9f92c14c02f669ef",
+"assets/configs/profile.json": "d05992fa83b2fe16c6a278b697771bee",
 "assets/FontManifest.json": "66b71d2bcd2b436ab06cceee43157084",
 "assets/fonts/MaterialIcons-Regular.otf": "95db9098c58fd6db106f1116bae85a0b",
 "assets/NOTICES": "2573c30da990f398bf6bce37a1c15391",
@@ -26,9 +26,9 @@ const RESOURCES = {
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
 "icons/Icon-maskable-512.png": "301a7604d45b3e739efc881eb04896ea",
-"index.html": "9bd49f6c59cdb5acca27cbbefbc83473",
-"/": "9bd49f6c59cdb5acca27cbbefbc83473",
-"main.dart.js": "f5e897f381db153b72c977df2f8ccbed",
+"index.html": "0326d8099207ba0e81681181a507827a",
+"/": "0326d8099207ba0e81681181a507827a",
+"main.dart.js": "e475551b50511e6fa0a1b94672ae272e",
 "manifest.json": "d6ca57350173b3ccd7074f958253fbee",
 "version.json": "c8f979d408e51acd1ee06f6af9b9722c"
 };
