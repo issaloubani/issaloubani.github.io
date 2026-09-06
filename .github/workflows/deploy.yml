@@ -29,6 +29,12 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      # Renders dist/cv/ to a real PDF using the Chrome preinstalled on the
+      # runner. Must come after build and before the artifact upload, since it
+      # writes into dist/.
+      - name: Generate CV PDF
+        run: npm run pdf
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
