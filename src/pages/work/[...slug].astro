@@ -1,0 +1,79 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((p) => ({ params: { slug: p.id }, props: { p } }));
+}
+
+const { p } = Astro.props;
+const { Content } = await render(p);
+---
+
+<Base title={`${p.data.title} — Issa Loubani`} description={p.data.summary}>
+  <div class="wrap">
+    <section class="proj-head">
+      <a class="back" href="/#work">&larr; back</a>
+      <h1>{p.data.title}</h1>
+      <div class="entry-meta">
+        <span>{p.data.year}</span>
+        <span class="sep">/</span>
+        <span>{p.data.context}</span>
+        <span class="sep">/</span>
+        <span>{p.data.role}</span>
+        {p.data.status && (
+          <>
+            <span class="sep">/</span>
+            <span class="status">{p.data.status}</span>
+          </>
+        )}
+      </div>
+      <div class="tags">
+        {p.data.tags.map((t) => <span>{t}</span>)}
+      </div>
+      {
+        p.data.links.length > 0 && (
+          <div class="entry-links">
+            {p.data.links.map((l) => (
+              <a href={l.href} target="_blank" rel="noopener">
+                {l.label}
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </section>
+  </div>
+
+  {
+    p.data.media.length > 0 && (
+      <div class="wrap">
+        <div class="proj-media">
+          {p.data.media.map((m) =>
+            m.type === 'video' ? (
+              <video
+                src={m.src}
+                poster={m.poster}
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                aria-label={m.alt}
+              />
+            ) : (
+              <img src={m.src} alt={m.alt} loading="lazy" decoding="async" />
+            )
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  <div class="wrap">
+    <div class="prose">
+      <Content />
+    </div>
+  </div>
+</Base>

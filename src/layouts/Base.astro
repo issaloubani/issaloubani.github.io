@@ -1,0 +1,77 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <div class="wrap">
+      <header class="mast">
+        <a class="brand" href="/">Issa Loubani</a>
+        <nav>
+          <a href="/#published">Published</a>
+          <a href="/#work">Work</a>
+          <a href="/#about">About</a>
+          <a class="cta" href="/#contact">Contact</a>
+        </nav>
+      </header>
+    </div>
+
+    <slot />
+
+    <div class="wrap">
+      <footer>
+        <span>Beirut, Lebanon</span>
+        <span>Open to remote &amp; Gulf</span>
+        <span>issa.loubani.5@gmail.com</span>
+      </footer>
+    </div>
+    <script is:inline>
+      // The previous Flutter site registered a service worker at this origin.
+      // Returning visitors would otherwise be served the old cached app
+      // indefinitely. Unregister anything left behind and drop its caches.
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (rs) {
+          rs.forEach(function (r) {
+            r.unregister();
+          });
+        });
+        if (window.caches && caches.keys) {
+          caches.keys().then(function (keys) {
+            keys.forEach(function (k) {
+              caches.delete(k);
+            });
+          });
+        }
+      }
+    </script>
+  </body>
+</html>

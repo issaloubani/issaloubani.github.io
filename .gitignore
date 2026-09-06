@@ -1,0 +1,20 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# dart demo build artefacts (arabizi.js itself IS committed)
+tools/**/.dart_tool/
+tools/**/pubspec.lock
+*.js.deps
+*.js.map
+
+# env / editor / os
+.env
+.env.production
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

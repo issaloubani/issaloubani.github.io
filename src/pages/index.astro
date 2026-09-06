@@ -1,0 +1,335 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Globe from '../components/Globe.astro';
+import ArabiziDemo from '../components/ArabiziDemo.astro';
+
+const all = await getCollection('projects');
+const sorted = all.sort((a, b) => a.data.order - b.data.order);
+const published = sorted.filter((p) => p.data.kind === 'published');
+const work = sorted.filter((p) => p.data.kind === 'work' && p.data.featured);
+const rest = sorted.filter((p) => p.data.kind === 'work' && !p.data.featured);
+
+const marquee = [
+  'Pipecat', 'WebRTC', 'SIP', 'Asterisk', 'AudioSocket', 'STT', 'TTS', 'LLM',
+  'FastAPI', 'Python', 'Arabic speech', 'DTMF', 'Coturn', 'RTPEngine', 'SIPp', 'ICE',
+];
+
+// Target allocation for one conversational turn. Design budget, not a capture.
+const budget = [
+  { k: 'Endpointing / VAD', ms: 120, hot: false },
+  { k: 'Transcription', ms: 180, hot: true },
+  { k: 'Model', ms: 300, hot: true },
+  { k: 'Synthesis', ms: 150, hot: true },
+  { k: 'Network / SIP', ms: 50, hot: false },
+];
+const budgetTotal = budget.reduce((s, b) => s + b.ms, 0);
+const budgetMax = Math.max(...budget.map((b) => b.ms));
+
+const title = 'Issa Loubani — Real-time AI systems';
+const description =
+  'I build AI voice agents that answer real phone calls. Pipecat, WebRTC, SIP, Python. Native Arabic speech evaluation. Beirut, Lebanon.';
+---
+
+<Base title={title} description={description}>
+  <div class="wrap">
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <Globe />
+      <h1>
+        Voice agents that<br />
+        answer <span class="dim">real phone calls</span>
+      </h1>
+      <p class="stand">
+        AI engineer, Beirut. I build real-time systems: software that perceives
+        something as it happens and answers before the moment has passed. Right
+        now that means voice agents on carrier telephony, in Arabic and English.
+      </p>
+      <div class="btns">
+        <a class="btn solid" href="#published">View published work</a>
+        <a class="btn" href="#contact">Get in touch</a>
+      </div>
+    </section>
+
+    <div class="ticker">
+      <div class="ticker-track">
+        {marquee.map((m) => <span>{m}</span>)}
+        {marquee.map((m) => <span>{m}</span>)}
+      </div>
+    </div>
+
+    <!-- ============ PUBLISHED ============ -->
+    <section class="sec" id="published">
+      <div class="sec-label">/ <b>Published</b> — live on public platforms</div>
+      <h2>Shipped, listed, and downloaded by strangers</h2>
+
+      <div class="pubgrid">
+        {
+          published.map((p) => (
+            <article class="panel pubcard">
+              {p.data.media.length > 0 ? (
+                <div class="shot">
+                  {p.data.media[0].type === 'video' ? (
+                    <video
+                      src={p.data.media[0].src}
+                      autoplay
+                      muted
+                      loop
+                      playsinline
+                      preload="metadata"
+                      aria-label={p.data.media[0].alt}
+                    />
+                  ) : (
+                    <img src={p.data.media[0].src} alt={p.data.media[0].alt} loading="lazy" />
+                  )}
+                </div>
+              ) : p.data.demo ? (
+                <button class="trybox" type="button" data-goto={p.data.demo}>
+                  <span class="tb-line">
+                    <span class="tb-src">{p.data.demoSample}</span>
+                    <span class="tb-arrow">&rarr;</span>
+                    <span class="tb-out" dir="rtl" lang="ar">&#1605;&#1585;&#1581;&#1576;</span>
+                  </span>
+                  <span class="tb-cta">Try it live &darr;</span>
+                </button>
+              ) : (
+                <div class="noshot">no preview</div>
+              )}
+
+              <div class="panel-head">
+                <span>{p.data.platform}</span>
+                <span class="dots"><i /><i /><i /></span>
+              </div>
+
+              <div class="panel-body" style="display:flex;flex-direction:column;flex:1">
+                <h3><a href={`/work/${p.id}/`}>{p.data.title}</a></h3>
+                <p class="sum">{p.data.summary}</p>
+                <dl class="statrow">
+                  {p.data.stats.map((s) => (
+                    <div>
+                      <dt>{s.label}</dt>
+                      <dd>{s.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+
+              <div class="cardlinks">
+                {p.data.demo && (
+                  <a href={p.data.demo} data-goto={p.data.demo}>Try it</a>
+                )}
+                <a href={`/work/${p.id}/`}>Detail</a>
+                {p.data.links.map((l) => (
+                  <a href={l.href} target="_blank" rel="noopener">{l.label}</a>
+                ))}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+
+      <ArabiziDemo />
+    </section>
+
+    <!-- ============ WORK ============ -->
+    <section class="sec" id="work">
+      <div class="sec-label">/ <b>Work</b> — production and personal</div>
+      <h2>Systems that have to answer in time</h2>
+
+      {
+        work.map((p, i) => (
+          <div class="entry">
+            <article class="panel">
+              <div class="panel-head">
+                <span>{p.data.context}</span>
+                <span>{p.data.year}</span>
+              </div>
+              <div class="panel-body">
+                <h3><a href={`/work/${p.id}/`}>{p.data.title}</a></h3>
+                <p class="sum">{p.data.summary}</p>
+                <div class="kv">
+                  <div class="r">
+                    <span class="k">Role</span>
+                    <span class="v">{p.data.role}</span>
+                  </div>
+                  {p.data.status && (
+                    <div class="r">
+                      <span class="k">Status</span>
+                      <span class="v acid">{p.data.status}</span>
+                    </div>
+                  )}
+                  <div class="r">
+                    <span class="k">Stack</span>
+                    <span class="v">{p.data.tags.join(', ')}</span>
+                  </div>
+                </div>
+                <div class="cardlinks" style="border-top:0;padding:0">
+                  <a href={`/work/${p.id}/`}>Detail</a>
+                  {p.data.links.map((l) => (
+                    <a href={l.href} target="_blank" rel="noopener">{l.label}</a>
+                  ))}
+                </div>
+              </div>
+            </article>
+
+            {/* Right pane: media if it exists, otherwise a real data panel. */}
+            {p.data.media.length > 0 ? (
+              <div class="panel media-pane">
+                <div class="panel-head">
+                  <span>Capture</span>
+                  <span class="dots"><i /><i /><i /></span>
+                </div>
+                <div class="inner">
+                  {p.data.media.slice(0, 1).map((m) =>
+                    m.type === 'video' ? (
+                      <video src={m.src} autoplay muted loop playsinline preload="metadata" aria-label={m.alt} />
+                    ) : (
+                      <img src={m.src} alt={m.alt} loading="lazy" />
+                    )
+                  )}
+                  {p.data.media.length > 1 && (
+                    <div class="pair">
+                      {p.data.media.slice(1, 3).map((m) => (
+                        <img src={m.src} alt={m.alt} loading="lazy" />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : i === 0 ? (
+              <div class="panel gridded">
+                <div class="panel-head">
+                  <span>Turn budget — target allocation</span>
+                  <span>{budgetTotal} ms</span>
+                </div>
+                <div class="panel-body">
+                  <div class="budget">
+                    {budget.map((b) => (
+                      <div class="b">
+                        <span class="bl">{b.k}</span>
+                        <span class="bt">
+                          <span
+                            class={b.hot ? 'bf' : 'bf dim'}
+                            style={`width:calc(${(b.ms / budgetMax) * 100}% - 2px)`}
+                          />
+                        </span>
+                        <span class="bv">{b.ms}ms</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div class="log" style="margin-top:1rem;border-top:1px solid var(--line-soft);padding-top:.7rem">
+                    <div class="l"><span class="t">00:00.000</span><span class="lv ok">OK</span><span class="m">caller speech ends, endpoint detected</span></div>
+                    <div class="l"><span class="t">00:00.300</span><span class="lv info">RUN</span><span class="m">transcript ready, <b>dispatching to model</b></span></div>
+                    <div class="l"><span class="t">00:00.600</span><span class="lv info">RUN</span><span class="m">first token, synthesis starts streaming</span></div>
+                    <div class="l"><span class="t">00:00.800</span><span class="lv ok">OK</span><span class="m">first audio frame reaches the caller</span></div>
+                    <div class="l"><span class="t">00:00.801</span><span class="lv warn">HOLD</span><span class="m cur">anything past here and the pause is audible </span></div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div class="panel gridded">
+                <div class="panel-head">
+                  <span>Capture</span>
+                  <span>pending</span>
+                </div>
+                <div class="panel-body" style="min-height:200px;display:grid;place-items:center">
+                  <span style="color:var(--fg-3);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase">
+                    footage not uploaded
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        ))
+      }
+    </section>
+
+    <!-- ============ ALSO ============ -->
+    <section class="sec" id="also">
+      <div class="sec-label">/ <b>Also</b> — archive</div>
+      <div class="rows">
+        {
+          rest.map((p) => (
+            <a class="rowitem" href={`/work/${p.id}/`}>
+              <h3>{p.data.title}</h3>
+              <p>{p.data.summary}</p>
+              <span class="yr">{p.data.year}</span>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section class="sec" id="about">
+      <div class="sec-label">/ <b>About</b></div>
+      <div class="two">
+        <div class="panel">
+          <div class="panel-head">
+            <span>readme</span>
+            <span class="dots"><i /><i /><i /></span>
+          </div>
+          <div class="panel-body prose-block">
+            <p>
+              I started the AI work at my company on my own. Customers liked what came
+              back, demand outgrew one person, and the company <b>built an AI team around
+              it</b>. I wrote the voice agent platform, I still maintain it, and I onboard
+              the engineers joining the team.
+            </p>
+            <p>
+              Most of the work is Pipecat and Python. The part fewer engineers have done
+              is the other end of the line: carrier SIP, AudioSocket, Asterisk, DTMF,
+              WebRTC through NAT. <b>A voice agent is a demo until it survives a real
+              telephony network.</b>
+            </p>
+            <p>
+              I am a native Arabic speaker, so I do the Arabic evaluation myself. Whether
+              a synthesised voice reads a phone number correctly, whether it drifts out of
+              dialect, whether a transcript is right or merely plausible. Benchmark scores
+              catch none of that.
+            </p>
+            <p>
+              Before voice: three years of Flutter across mobile and web, and a stretch on
+              WebRTC and TURN infrastructure. That background is why the telephony side
+              does not scare me.
+            </p>
+          </div>
+        </div>
+
+        <div class="panel gridded">
+          <div class="panel-head">
+            <span>spec</span>
+            <span>v2026</span>
+          </div>
+          <div class="panel-body">
+            <div class="kv">
+              <div class="r"><span class="k">Role</span><span class="v acid">AI Engineer, voice &amp; real-time speech</span></div>
+              <div class="r"><span class="k">Since</span><span class="v">2021 — 5 years</span></div>
+              <div class="r"><span class="k">Core</span><span class="v">Python, FastAPI, Pipecat</span></div>
+              <div class="r"><span class="k">Transport</span><span class="v">WebRTC, SIP, Asterisk, AudioSocket</span></div>
+              <div class="r"><span class="k">Speech</span><span class="v">STT, TTS, ASR, LLM tool calling</span></div>
+              <div class="r"><span class="k">Before</span><span class="v">Flutter, Kotlin, Spring Boot</span></div>
+              <div class="r"><span class="k">Arabic</span><span class="v acid">Native — Levantine &amp; MSA</span></div>
+              <div class="r"><span class="k">English</span><span class="v">Fluent</span></div>
+              <div class="r"><span class="k">French</span><span class="v">Conversational</span></div>
+              <div class="r"><span class="k">Based</span><span class="v">Beirut, Lebanon</span></div>
+              <div class="r"><span class="k">Open to</span><span class="v acid">Remote &amp; Gulf</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section class="sec contact" id="contact">
+      <div class="sec-label">/ <b>Contact</b></div>
+      <a class="mail" href="mailto:issa.loubani.5@gmail.com">issa.loubani.5@gmail.com</a>
+      <div class="btns" style="margin-top:1.6rem">
+        <a class="btn" href="https://github.com/issaloubani" target="_blank" rel="noopener">GitHub</a>
+        <a class="btn" href="https://www.linkedin.com/in/issa-loubani" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="btn" href="https://pub.dev/packages/arabizi_transliterator" target="_blank" rel="noopener">pub.dev</a>
+        <a class="btn" href="https://plugins.jetbrains.com/plugin/22024-glb-viewer" target="_blank" rel="noopener">JetBrains</a>
+      </div>
+    </section>
+  </div>
+</Base>

@@ -1,0 +1,189 @@
+---
+// Rotating pixel globe. Dots are laid out equal-area on a sphere, each one
+// sampled against a coarse land mask, projected orthographically and drawn as
+// snapped squares so it reads as a terminal bitmap rather than smooth vector.
+---
+
+<div class="globe-wrap" aria-hidden="true">
+  <canvas id="globe"></canvas>
+</div>
+
+<style>
+  .globe-wrap {
+    position: absolute;
+    right: -8%;
+    top: 50%;
+    transform: translateY(-42%);
+    width: min(52vw, 620px);
+    aspect-ratio: 1;
+    pointer-events: none;
+    z-index: 0;
+    /* Fade the globe out at the edges so it sits behind the type. */
+    mask-image: radial-gradient(circle at 50% 50%, #000 55%, transparent 76%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 55%, transparent 76%);
+  }
+  .globe-wrap canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated;
+  }
+  @media (max-width: 900px) {
+    .globe-wrap {
+      right: -28%;
+      top: auto;
+      bottom: -6%;
+      transform: none;
+      width: 90vw;
+      opacity: 0.5;
+    }
+  }
+</style>
+
+<script>
+  // 36 x 18 land mask, 10 degree cells. Row 0 is 90..80N, col 0 is 180..170W.
+  // Coarse on purpose: at dot resolution it only needs to read as Earth.
+  const MASK = [
+    '....................................',
+    '.....############..#..###########...',
+    '..###############.##################',
+    '....##########...###################',
+    '......########...###################',
+    '......######....###################.',
+    '.......####.....#################...',
+    '.........###...#########.#######....',
+    '...........###..#######.....#####...',
+    '...........#####.######......#####..',
+    '...........####....####.......###...',
+    '...........###.....###.......#####..',
+    '...........##......##........#####.#',
+    '...........##.....................##',
+    '............#.......................',
+    '####################################',
+    '####################################',
+    '####################################',
+  ];
+
+  const DEG = Math.PI / 180;
+  const canvas = document.getElementById('globe') as HTMLCanvasElement | null;
+
+  if (canvas) {
+    const ctx = canvas.getContext('2d', { alpha: true })!;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    type Pt = { lat: number; lon: number; land: boolean };
+    const pts: Pt[] = [];
+
+    // Equal-area-ish distribution: points per ring scale with cos(latitude),
+    // otherwise the poles bunch up and the sphere looks wrong.
+    for (let lat = -87; lat <= 87; lat += 3.2) {
+      const ring = Math.max(6, Math.round(150 * Math.cos(lat * DEG)));
+      for (let i = 0; i < ring; i++) {
+        const lon = -180 + (360 * i) / ring;
+        const r = Math.min(17, Math.max(0, Math.floor((90 - lat) / 10)));
+        const c = Math.min(35, Math.max(0, Math.floor((lon + 180) / 10)));
+        pts.push({ lat, lon, land: MASK[r].charAt(c) === '#' });
+      }
+    }
+
+    // Beirut. The one marked point on the map, and the only one that means
+    // anything: it is where all of this is built.
+    const HOME = { lat: 33.89, lon: 35.5 };
+
+    let W = 0,
+      H = 0,
+      R = 0,
+      dpr = 1;
+
+    function resize() {
+      const rect = canvas!.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      W = Math.max(1, Math.round(rect.width * dpr));
+      H = Math.max(1, Math.round(rect.height * dpr));
+      canvas!.width = W;
+      canvas!.height = H;
+      R = Math.min(W, H) * 0.44;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Pre-bucket by brightness so fillStyle is set a handful of times per
+    // frame instead of once per dot.
+    const BUCKETS = 5;
+    const buckets: number[][] = Array.from({ length: BUCKETS * 2 }, () => []);
+
+    function project(latD: number, lonD: number, rot: number) {
+      const la = latD * DEG;
+      const lo = (lonD + rot) * DEG;
+      const cl = Math.cos(la);
+      return {
+        x: cl * Math.sin(lo),
+        y: Math.sin(la),
+        z: cl * Math.cos(lo),
+      };
+    }
+
+    function frame(t: number) {
+      const rot = reduce ? -28 : (t * 0.006) % 360;
+      const cx = W / 2;
+      const cy = H / 2;
+      const size = Math.max(2, Math.round(2 * dpr));
+
+      ctx.clearRect(0, 0, W, H);
+      for (const b of buckets) b.length = 0;
+
+      for (let i = 0; i < pts.length; i++) {
+        const p = pts[i];
+        const v = project(p.lat, p.lon, rot);
+        if (v.z <= 0.02) continue; // back hemisphere
+        const px = Math.round(cx + v.x * R);
+        const py = Math.round(cy - v.y * R);
+        // Depth shading: dots near the limb dim out.
+        const depth = Math.min(1, Math.max(0, v.z));
+        const lvl = Math.min(BUCKETS - 1, Math.floor(depth * BUCKETS));
+        const idx = (p.land ? BUCKETS : 0) + lvl;
+        buckets[idx].push(px, py);
+      }
+
+      for (let b = 0; b < buckets.length; b++) {
+        const arr = buckets[b];
+        if (!arr.length) continue;
+        const isLand = b >= BUCKETS;
+        const lvl = b % BUCKETS;
+        const a = isLand
+          ? 0.22 + (lvl / (BUCKETS - 1)) * 0.62
+          : 0.05 + (lvl / (BUCKETS - 1)) * 0.10;
+        ctx.fillStyle = `rgba(51,255,119,${a.toFixed(3)})`;
+        for (let i = 0; i < arr.length; i += 2) {
+          ctx.fillRect(arr[i], arr[i + 1], size, size);
+        }
+      }
+
+      // Home marker, front hemisphere only.
+      const h = project(HOME.lat, HOME.lon, rot);
+      if (h.z > 0.02) {
+        const hx = Math.round(cx + h.x * R);
+        const hy = Math.round(cy - h.y * R);
+        const pulse = reduce ? 0.6 : 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t / 520));
+        ctx.fillStyle = `rgba(51,255,119,${(0.9 * h.z).toFixed(3)})`;
+        ctx.fillRect(hx - size, hy - size, size * 3, size * 3);
+        ctx.strokeStyle = `rgba(51,255,119,${(pulse * 0.55 * h.z).toFixed(3)})`;
+        ctx.lineWidth = Math.max(1, dpr);
+        const rr = 6 * dpr + pulse * 10 * dpr;
+        ctx.beginPath();
+        ctx.arc(hx + size / 2, hy + size / 2, rr, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      if (!reduce) requestAnimationFrame(frame);
+    }
+
+    // Draw one frame synchronously. rAF does not fire in a hidden tab, so
+    // without this the globe stays blank until the tab is first looked at.
+    // frame() reschedules itself unless reduced motion is on.
+    frame(0);
+    window.addEventListener('visibilitychange', () => {
+      if (!document.hidden && !reduce) requestAnimationFrame(frame);
+    });
+  }
+</script>

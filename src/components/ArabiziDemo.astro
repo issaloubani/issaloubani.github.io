@@ -1,0 +1,207 @@
+---
+// Live demo of the published arabizi_transliterator package.
+// The package source is compiled to JS with `dart compile js` (60 KB) and
+// loaded on first interaction, so it costs nothing until someone tries it.
+const samples = ['mar7aba', 'kifak', 'shukran', '2ana b7ebbak', '3am teshuf'];
+---
+
+<div class="panel gridded arabizi" id="arabizi">
+  <div class="panel-head">
+    <span>Live — arabizi_transliterator v1.0.0</span>
+    <span class="dots"><i /><i /><i /></span>
+  </div>
+  <div class="panel-body">
+    <p class="az-note">
+      This is the actual published package, compiled from Dart to JavaScript and
+      running in your browser. Type Arabizi below.
+    </p>
+
+    <div class="az-io">
+      <label class="az-in">
+        <span class="az-prompt">&gt;</span>
+        <input
+          id="az-input"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="mar7aba kifak"
+          aria-label="Arabizi input"
+        />
+      </label>
+      <div class="az-out" id="az-out" dir="rtl" lang="ar"><span class="az-idle">…</span></div>
+    </div>
+
+    <div class="az-samples">
+      {samples.map((s) => <button type="button" data-s={s}>{s}</button>)}
+    </div>
+
+    <div class="az-sug" id="az-sug"></div>
+    <div class="az-status" id="az-status">idle — package not loaded yet</div>
+  </div>
+</div>
+
+<style>
+  .arabizi { margin-top: 0.7rem; }
+  .az-note { color: var(--fg-2); font-size: 12px; margin: 0 0 1rem; max-width: 62ch; }
+
+  .az-io {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+    align-items: stretch;
+  }
+  .az-in {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 1px solid var(--line);
+    background: #000;
+    padding: 0.7rem 0.8rem;
+  }
+  .az-prompt { color: var(--acid); flex: none; }
+  #az-input {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: var(--fg);
+    font-family: var(--mono);
+    font-size: 15px;
+    caret-color: var(--acid);
+    min-width: 0;
+  }
+  #az-input::placeholder { color: var(--fg-3); }
+
+  .az-out {
+    border: 1px solid var(--line);
+    background: #000;
+    padding: 0.7rem 0.9rem;
+    font-size: 22px;
+    line-height: 1.6;
+    color: var(--acid);
+    display: flex;
+    align-items: center;
+    word-break: break-word;
+    min-height: 54px;
+  }
+  .az-out .az-idle { color: var(--fg-3); font-size: 15px; }
+
+  .az-samples { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.7rem; }
+  .az-samples button {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--fg-2);
+    background: transparent;
+    border: 1px solid var(--line-soft);
+    padding: 0.22rem 0.5rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .az-samples button:hover { color: var(--acid); border-color: var(--line); }
+
+  .az-sug {
+    margin-top: 0.8rem;
+    font-size: 12px;
+    color: var(--fg-2);
+    min-height: 1.4em;
+  }
+  .az-sug b { color: var(--acid); font-weight: 400; font-size: 15px; padding-left: 0.5rem; }
+
+  .az-status {
+    margin-top: 0.7rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--line-soft);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    color: var(--fg-3);
+  }
+  .az-status.ok { color: var(--acid); }
+
+  @media (max-width: 760px) {
+    .az-io { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  const input = document.getElementById('az-input') as HTMLInputElement | null;
+  const out = document.getElementById('az-out');
+  const sug = document.getElementById('az-sug');
+  const status = document.getElementById('az-status');
+
+  if (input && out && sug && status) {
+    let loading: Promise<void> | null = null;
+
+    // Only fetch the compiled package once someone actually engages with it.
+    function load(): Promise<void> {
+      if (loading) return loading;
+      status!.textContent = 'loading package…';
+      loading = new Promise<void>((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = '/arabizi/arabizi.js';
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error('failed to load'));
+        document.head.appendChild(s);
+      })
+        .then(() => {
+          status!.textContent = 'package loaded — 60 kb, compiled from dart';
+          status!.classList.add('ok');
+        })
+        .catch(() => {
+          status!.textContent = 'package failed to load';
+          loading = null;
+        });
+      return loading;
+    }
+
+    function render() {
+      const v = input!.value.trim();
+      if (!v) {
+        out!.innerHTML = '<span class="az-idle">…</span>';
+        sug!.textContent = '';
+        return;
+      }
+      const g = globalThis as any;
+      if (typeof g.arabiziFull !== 'function') return;
+      try {
+        out!.textContent = g.arabiziFull(v);
+        const list = g.arabiziSuggest(v) || [];
+        sug!.innerHTML = list.length
+          ? 'dictionary suggestions:' +
+            list.slice(0, 6).map((x: string) => `<b>${x}</b>`).join('')
+          : '';
+      } catch {
+        out!.textContent = '—';
+      }
+    }
+
+    const kick = () => load().then(render);
+    input.addEventListener('focus', kick, { once: true });
+    input.addEventListener('input', kick);
+
+    // Anything marked data-goto="#arabizi" scrolls here, flashes the panel,
+    // and drops the caret in the input so the next keystroke just works.
+    document.querySelectorAll<HTMLElement>('[data-goto]').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        const panel = document.getElementById('arabizi');
+        if (!panel) return;
+        panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        panel.classList.remove('flash');
+        void panel.offsetWidth; // restart the animation
+        panel.classList.add('flash');
+        setTimeout(() => input.focus({ preventScroll: true }), 420);
+        load();
+      });
+    });
+
+    document.querySelectorAll<HTMLButtonElement>('.az-samples button').forEach((b) => {
+      b.addEventListener('click', () => {
+        input.value = b.dataset.s || '';
+        input.focus();
+        kick();
+      });
+    });
+  }
+</script>
