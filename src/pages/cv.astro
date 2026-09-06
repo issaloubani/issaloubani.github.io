@@ -1,0 +1,313 @@
+---
+import Base from '../layouts/Base.astro';
+
+// ---------------------------------------------------------------------------
+// Single place to edit the CV. Everything below renders from this.
+// ---------------------------------------------------------------------------
+
+const education = {
+  degree: 'BE, Computer and Communication Engineering',
+  institution: 'Lebanese International University',
+  years: '2017 — 2021',
+  detail:
+    "GPA 3.8/4. Dean's and President's lists. Capstone applied machine learning to image compression.",
+};
+
+// Deliberately condensed. The Deep Learning Specialization already contains
+// the five courses LinkedIn lists separately; printing both reads as padding.
+const certs = [
+  ['Deep Learning Specialization', 'DeepLearning.AI on Coursera', '2024'],
+  ['Machine Learning Specialization', 'DeepLearning.AI on Coursera', '2023'],
+  ['Linux 2: Advanced Linux Administration', 'Cisco Networking Academy', '2025'],
+];
+
+const roles = [
+  {
+    title: 'AI Engineer, Voice & Real-Time Speech',
+    org: 'Apliman Technologies',
+    where: 'Beirut, Lebanon',
+    when: 'Feb 2025 — present',
+    lead:
+      'Started the AI work at Apliman alone while in R&D. Customer demand outgrew one person and the company formed an AI team around it. I own the voice agent platform and onboard the engineers joining the team.',
+    points: [
+      'Built the AI voice agent platform sold to telecom and enterprise customers across MENA. Sole initial developer, current maintainer.',
+      'Shipped V1: agent management UI, WebRTC and AudioSocket transports, LLM tool and function calling, knowledge base management.',
+      'Put agents on live phone calls over carrier-grade SIP. Asterisk and AudioSocket for local testing, DTMF for IVR-style flows.',
+      'Delivered assistants for banking, mobile money and hospital appointment booking, in bilingual Arabic and English and in French-first flows.',
+      'Deep Pipecat work in Python and FastAPI: frame architecture, custom processors and transports, WebRTC ICE and Docker networking.',
+      'Benchmarked self-hosted speech stacks (Faster Whisper, XTTS v2, speech-to-speech models) against hosted APIs on latency, cost and Arabic accuracy. Ran the Arabic evaluation personally as a native speaker.',
+      'Built the WebRTC and TURN layer: Coturn, RTPEngine, ICE, NAT traversal. Load tested with SIPp against Asterisk.',
+      'Onboard and mentor new AI engineers and interns.',
+      'Building V2: multi-tenant architecture, analytics, encryption and security.',
+    ],
+  },
+  {
+    title: 'R&D Engineer',
+    org: 'Apliman Technologies',
+    where: 'Beirut, Lebanon',
+    when: 'Jan 2024 — Feb 2025',
+    lead:
+      'Promoted into R&D to evaluate emerging technology and turn it into tooling the engineering teams could use. The AI work started here as a side track and became the job.',
+    points: [
+      'Prototyped an LLM tool that answered questions about the codebase and generated code in context.',
+      'Evaluated Kubernetes, gRPC, and NLP and LLM tooling for internal use.',
+      'Supported product teams in Flutter through delivery crunches.',
+    ],
+  },
+  {
+    title: 'Full Stack Developer',
+    org: 'Apliman Technologies',
+    where: 'Beirut, Lebanon',
+    when: 'Sep 2022 — Jan 2024',
+    lead: '',
+    points: [
+      'Built web and mobile applications in Flutter and REST APIs in Spring Boot.',
+      'Deployed with Docker and Tomcat. Wrote a reusable Flutter library released for other teams.',
+    ],
+  },
+  {
+    title: 'Flutter Developer',
+    org: 'Easysoft ME',
+    where: 'Beirut, Lebanon',
+    when: 'Sep 2021 — Aug 2022',
+    lead: '',
+    points: [
+      'Built and maintained Android and iOS applications, published to Google Play and the App Store.',
+      'Wrote reusable Flutter libraries and built data visualisation features from Adobe XD designs.',
+    ],
+  },
+];
+
+const published = [
+  {
+    name: 'glb-viewer',
+    where: 'JetBrains Marketplace',
+    note: 'IntelliJ plugin for inspecting 3D GLB models in the IDE. Most-installed GLB viewer on the Marketplace.',
+    stat: '7,900+ installs',
+  },
+  {
+    name: 'arabizi_transliterator',
+    where: 'pub.dev',
+    note: 'Dart package converting Arabizi (Latin-character Arabic) to Arabic script. Live demo on this site.',
+    stat: '160/160 pub points',
+  },
+  {
+    name: 'omori-progress-bar',
+    where: 'JetBrains Marketplace',
+    note: 'Themed replacement for the IDE progress bar, across all JetBrains IDEs.',
+    stat: '',
+  },
+];
+
+const skills = [
+  ['Voice & real-time', 'Pipecat, WebRTC, SIP, Asterisk, AudioSocket, DTMF, Coturn, RTPEngine, ICE, SIPp'],
+  ['AI & speech', 'STT, TTS, ASR, LLM tool calling, Faster Whisper, XTTS v2, LoRA fine-tuning, YOLO'],
+  ['Backend', 'Python, FastAPI, Spring Boot, Docker, REST, gRPC'],
+  ['Frontend & mobile', 'Flutter (web, iOS, Android), Dart, Kotlin, Java'],
+  ['Languages', 'Arabic (native, Levantine & MSA), English (fluent), French'],
+];
+
+const title = 'CV — Issa Loubani';
+const description =
+  'Issa Loubani, AI engineer specialising in voice agents and real-time speech. Pipecat, WebRTC, SIP, Python. Beirut, Lebanon.';
+---
+
+<Base title={title} description={description}>
+  <div class="wrap cv">
+    <header class="cv-head">
+      <div>
+        <h1>Issa Loubani</h1>
+        <p class="cv-role">AI Engineer &mdash; Voice &amp; Real-Time Speech</p>
+      </div>
+      <div class="cv-contact">
+        <span>Beirut, Lebanon</span>
+        <a href="mailto:issa.loubani.5@gmail.com">issa.loubani.5@gmail.com</a>
+        <a href="https://issaloubani.github.io">issaloubani.github.io</a>
+        <a href="https://www.linkedin.com/in/issa-loubani">linkedin.com/in/issa-loubani</a>
+        <a href="https://github.com/issaloubani">github.com/issaloubani</a>
+      </div>
+    </header>
+
+    <div class="cv-actions no-print">
+      <button class="btn" id="cv-print" type="button">Print / save as PDF</button>
+      <a class="btn" href="/">Back to site</a>
+    </div>
+
+    <section class="cv-sec">
+      <h2>Profile</h2>
+      <p class="cv-summary">
+        AI engineer who builds voice agents that answer real phone calls. Started
+        the AI practice at a MENA telecom software vendor single-handedly and now
+        owns the voice platform it turned into. Unusual combination of real-time
+        audio, carrier telephony, and native Arabic speech evaluation. Five years
+        shipping software, four of them at the same company across three roles.
+        BE in Computer and Communication Engineering, GPA 3.8/4, with a
+        machine-learning capstone in 2021.
+      </p>
+    </section>
+
+    <section class="cv-sec">
+      <h2>Experience</h2>
+      {
+        roles.map((r) => (
+          <article class="cv-role-block">
+            <div class="cv-role-head">
+              <h3>
+                {r.title} <span class="cv-org">&middot; {r.org}</span>
+              </h3>
+              <span class="cv-when">{r.when}</span>
+            </div>
+            {r.lead && <p class="cv-lead">{r.lead}</p>}
+            <ul>
+              {r.points.map((pt) => (
+                <li>{pt}</li>
+              ))}
+            </ul>
+          </article>
+        ))
+      }
+    </section>
+
+    <section class="cv-sec">
+      <h2>Published work</h2>
+      <ul class="cv-pub">
+        {
+          published.map((p) => (
+            <li>
+              <b>{p.name}</b> <span class="cv-org">&middot; {p.where}</span>
+              {p.stat && <span class="cv-stat">{p.stat}</span>}
+              <br />
+              {p.note}
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="cv-sec">
+      <h2>Skills</h2>
+      <dl class="cv-skills">
+        {
+          skills.map(([k, v]) => (
+            <>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="cv-sec">
+      <h2>Education</h2>
+      <div class="cv-role-head">
+        <h3>
+          {education.degree} <span class="cv-org">&middot; {education.institution}</span>
+        </h3>
+        <span class="cv-when">{education.years}</span>
+      </div>
+      <p class="cv-lead">{education.detail}</p>
+    </section>
+
+    <section class="cv-sec">
+      <h2>Certifications</h2>
+      <ul class="cv-pub">
+        {
+          certs.map(([name, issuer, year]) => (
+            <li>
+              <b>{name}</b> <span class="cv-org">&middot; {issuer}</span>
+              <span class="cv-stat">{year}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+
+  <script is:inline>
+    document.getElementById('cv-print')?.addEventListener('click', () => window.print());
+  </script>
+</Base>
+
+<style is:global>
+  /* ---------- screen: matches the rest of the site ---------- */
+  .cv { max-width: 900px; padding-top: 2rem; padding-bottom: 4rem; }
+  .cv-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 1rem;
+  }
+  .cv h1 {
+    font-family: var(--disp);
+    font-weight: 700;
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    text-transform: uppercase;
+    color: var(--acid);
+    margin: 0 0 0.3rem;
+    letter-spacing: -0.02em;
+  }
+  .cv-role { margin: 0; color: var(--fg-2); font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .cv-contact { display: flex; flex-direction: column; gap: 0.15rem; font-size: 11.5px; color: var(--fg-2); text-align: right; }
+  .cv-contact a { color: var(--acid); text-decoration: none; }
+  .cv-actions { display: flex; gap: 0.6rem; margin: 1.2rem 0 0; }
+  .cv-actions .btn { cursor: pointer; background: transparent; font-family: var(--mono); }
+
+  .cv-sec { padding: 1.8rem 0 0; }
+  .cv-sec h2 {
+    font-family: var(--disp);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--acid);
+    border-bottom: 1px solid var(--line-soft);
+    padding-bottom: 0.4rem;
+    margin: 0 0 1rem;
+  }
+  .cv-summary { color: var(--fg-2); font-size: 12.5px; max-width: 80ch; margin: 0; }
+  .cv-role-block { margin-bottom: 1.4rem; }
+  .cv-role-head { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; flex-wrap: wrap; }
+  .cv-role-head h3 { font-family: var(--mono); font-size: 13.5px; font-weight: 500; margin: 0; color: var(--fg); }
+  .cv-org { color: var(--fg-2); font-weight: 400; }
+  .cv-when { font-size: 11.5px; color: var(--fg-3); white-space: nowrap; }
+  .cv-lead { color: var(--fg-2); font-size: 12px; margin: 0.4rem 0 0.5rem; max-width: 82ch; }
+  .cv ul { margin: 0.3rem 0 0; padding-left: 1.1rem; }
+  .cv li { color: var(--fg-2); font-size: 12px; margin-bottom: 0.22rem; }
+  .cv-pub { list-style: none; padding: 0; }
+  .cv-pub li { margin-bottom: 0.7rem; }
+  .cv-pub b { color: var(--fg); font-weight: 500; }
+  .cv-stat { color: var(--acid); font-size: 11.5px; padding-left: 0.6rem; }
+  .cv-skills { display: grid; grid-template-columns: 150px 1fr; gap: 0.3rem 1rem; margin: 0; font-size: 12px; }
+  .cv-skills dt { color: var(--fg-3); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; padding-top: 2px; }
+  .cv-skills dd { margin: 0; color: var(--fg-2); }
+
+  /* ---------- print: conventional, ATS-parseable, black on white ---------- */
+  @media print {
+    @page { margin: 14mm 14mm; }
+    body { background: #fff !important; color: #111 !important; font-size: 9.6pt; }
+    body::before { display: none !important; }
+    .mast, footer, .no-print, .globe-wrap { display: none !important; }
+    .cv { max-width: none; padding: 0; }
+    .cv,
+    .cv * {
+      color: #111 !important;
+      font-family: 'Helvetica Neue', Arial, sans-serif !important;
+      background: transparent !important;
+    }
+    .cv h1 { font-size: 20pt; letter-spacing: 0; text-transform: none; }
+    .cv-role { font-size: 10pt; letter-spacing: 0.04em; }
+    .cv-contact { font-size: 8.4pt; }
+    .cv-contact a, .cv-sec h2, .cv-stat { color: #111 !important; }
+    .cv-sec { padding-top: 10pt; }
+    .cv-sec h2 { font-size: 9pt; border-bottom: 0.6pt solid #999; letter-spacing: 0.14em; }
+    .cv-head { border-bottom: 0.8pt solid #333; }
+    .cv-role-head h3 { font-size: 10.4pt; }
+    .cv li, .cv-lead, .cv-summary, .cv-skills { font-size: 9.4pt; }
+    .cv-role-block, .cv-sec { break-inside: avoid; }
+    /* Print the destination of every link, since a PDF loses the anchor. */
+    .cv-contact a::after { content: ''; }
+  }
+</style>
